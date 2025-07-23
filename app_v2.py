@@ -1,9 +1,9 @@
-import streamlit as st
-from google import genai
+import streamlit as st 
+import google.generativeai as genai
 import json
 from content import limpar_texto_html, fetch_normativo
 from datetime import datetime
-import os
+
 
 # Configurações
 KEY = os.environ.get("KEY")
@@ -11,7 +11,7 @@ if not KEY:
     raise RuntimeError(
         "API key not found. Please set the KEY environment variable."
     )
-client = genai.Client(api_key=KEY)
+genai.configure(api_key=KEY)
 
 SYSTEM_PROMPT = (
     "Atue como um analista regulatório. "
@@ -65,8 +65,8 @@ with st.sidebar.expander("📄 Adicionar norma"):
                 log_path = f"chat_{safe_tipo}_{numero}.log"
                 st.session_state.log_path = log_path
                 # inicia chat
-                chat = client.chats.create(model="gemini-2.5-flash-lite-preview-06-17")
-                # envia sistema
+                model = genai.GenerativeModel("gemini-2.5-flash-lite-preview-06-17")  # substitua se necessário
+                chat = model.start_chat()
                 chat.send_message(SYSTEM_PROMPT)
                 escreve_log(log_path, "system", SYSTEM_PROMPT)
                 st.session_state.chat = chat
@@ -82,24 +82,19 @@ with st.sidebar.expander("📄 Adicionar norma"):
 
 # Área principal: chat
 if st.session_state.norma_loaded:
-    # Pergunta
     pergunta = st.chat_input("Faça sua pergunta sobre as normas:")
     if pergunta:
-        # log e histórico
         escreve_log(st.session_state.log_path, "user", pergunta)
         st.session_state.history.append({"role": "user", "content": pergunta})
-        # envia ao Gemini
         try:
             resp = st.session_state.chat.send_message(pergunta)
             answer = resp.text
         except Exception as e:
             answer = f"Erro ao chamar Gemini: {e}"
             escreve_log(st.session_state.log_path, "error", answer)
-        # log e histórico da resposta
         escreve_log(st.session_state.log_path, "assistant", answer)
         st.session_state.history.append({"role": "assistant", "content": answer})
 
-    # Exibe todo o histórico (omitindo system e payload internos)
     for msg in st.session_state.history:
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
