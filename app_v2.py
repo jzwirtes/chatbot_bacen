@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 from google import genai
 import json
@@ -23,7 +24,12 @@ reg_types = [
     "Resolução Conjunta"
 ]
 
+LOG_DIR = "logs"
+
+os.makedirs(LOG_DIR, exist_ok=True)
+
 def escreve_log(log_path: str, role: str, content: str):
+    os.makedirs(os.path.dirname(log_path), exist_ok=True)
     ts = datetime.now().isoformat(sep=" ", timespec="seconds")
     with open(log_path, "a", encoding="utf-8") as f:
         f.write(f"[{ts}] {role}: {content}\n\n")
@@ -57,7 +63,7 @@ with st.sidebar.expander("📄 Adicionar norma"):
             # Se for a primeira norma, inicializa chat e log
             if not st.session_state.norma_loaded:
                 safe_tipo = tipo_reg.replace(" ", "_").replace("º", "")
-                log_path = f"chat_{safe_tipo}_{numero}.log"
+                log_path = os.path.join(LOG_DIR, f"chat_{safe_tipo}_{numero}.log")
                 st.session_state.log_path = log_path
                 # inicia chat
                 chat = client.chats.create(model="gemini-2.5-flash-lite-preview-06-17")
