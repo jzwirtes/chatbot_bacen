@@ -3,9 +3,14 @@ from google import genai
 import json
 from content import limpar_texto_html, fetch_normativo
 from datetime import datetime
+import os
 
 # Configurações
-KEY = ""
+KEY = os.environ.get("KEY")
+if not KEY:
+    raise RuntimeError(
+        "API key not found. Please set the KEY environment variable."
+    )
 client = genai.Client(api_key=KEY)
 
 SYSTEM_PROMPT = (
