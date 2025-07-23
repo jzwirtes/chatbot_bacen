@@ -5,7 +5,7 @@ from content import limpar_texto_html, fetch_normativo
 from datetime import datetime
 
 # Configurações
-KEY = "AIzaSyDcL1p6nE1rEbgJUaquV7J_ZZzU7sRL2KY"
+KEY = ""
 client = genai.Client(api_key=KEY)
 
 SYSTEM_PROMPT = (
