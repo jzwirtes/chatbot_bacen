@@ -99,3 +99,16 @@ if st.session_state.norma_loaded:
     for msg in st.session_state.history:
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
+
+    # Botão para download da conversa
+    if st.session_state.history:
+        log_data = ""
+        if st.session_state.log_path and os.path.exists(st.session_state.log_path):
+            with open(st.session_state.log_path, "r", encoding="utf-8") as f:
+                log_data = f.read()
+        st.download_button(
+            "📥 Baixar conversa",
+            log_data,
+            file_name=os.path.basename(st.session_state.log_path) if st.session_state.log_path else "conversa.log",
+            mime="text/plain",
+        )
